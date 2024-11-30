@@ -11,6 +11,11 @@ resource "google_service_account_iam_member" "terraform_sa" {
     member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.mypool.name}/attribute.repository/${var.github_repository}"
 }
 
+
+# ls -lhはメタデータの大きさ
+# du -sh iac がベスト
+# git rm -r --cached iac/.terraform/
+
 # Terraform 用サービスアカウントに IAM ロールを付与
 # https://blog.g-gen.co.jp/entry/how-to-use-iam-resources-of-terraform
 # 基本的にiam_memberを使っておけばok
