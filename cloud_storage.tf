@@ -1,13 +1,12 @@
-# terraformのstate fileをGCPで管理する。※一人での作業の場合、localでも管理は可能
-# そのファイルを格納するための場所を作成
+# test bucket
 
-# resource "google_storage_bucket" "tfstate" {
-#   name          = "${var.project_id}-tfstate"
-#   location      = var.region
-#   storage_class = "STANDARD"
-#   uniform_bucket_level_access = true
+resource "google_storage_bucket" "test" {
+  name          = "${var.project_id}-test"
+  location      = var.region
+  storage_class = "STANDARD"
+  uniform_bucket_level_access = true
 
-#   versioning {
-#     enabled = true
-#   }
-# }
+  versioning {
+    enabled = true
+  }
+}

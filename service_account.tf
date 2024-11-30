@@ -4,12 +4,19 @@ data "google_service_account" "terraform_sa" {
     account_id = var.terraform_email
 }
 
-# サービスアカウントの IAM Policy 設定と GitHub リポジトリの指定、userとしてrepositoryを追加
+# Service Account IAM Binding for Workload Identity
 resource "google_service_account_iam_member" "terraform_sa" {
-    service_account_id = data.google_service_account.terraform_sa.id
-    role               = "roles/iam.workloadIdentityUser"
-    member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.mypool.name}/attribute.repository/${var.github_repository}"
+  service_account_id = data.google_service_account.terraform_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.mypool.name}/attribute.repository/Yuriyamadama/test_123"
 }
+
+# # サービスアカウントの IAM Policy 設定と GitHub リポジトリの指定、userとしてrepositoryを追加
+# resource "google_service_account_iam_member" "terraform_sa" {
+#     service_account_id = data.google_service_account.terraform_sa.id
+#     role               = "roles/iam.workloadIdentityUser"
+#     member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.mypool.name}/attribute.repository/${var.github_repository}"
+# }
 
 # ファイル構成
 # ls -lhはメタデータの大きさ

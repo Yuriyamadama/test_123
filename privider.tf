@@ -41,13 +41,13 @@ resource "google_iam_workload_identity_pool" "mypool" {
   
 # Workload Identity Provider 設定
 
-  
+# Workload Identity Pool Provider for GitHub Actions
 resource "google_iam_workload_identity_pool_provider" "github_actions_oidc" {
   project                            = local.project_id
   workload_identity_pool_provider_id = "myprovider"
-  workload_identity_pool_id          = google_iam_workload_identity_pool.mypool.workload_identity_pool_id 
-  display_name              = "GitHub Actions OIDC Provider"
-  description                        = "GitHub Actions で使用"
+  workload_identity_pool_id          = google_iam_workload_identity_pool.mypool.workload_identity_pool_id
+  display_name                       = "GitHub Actions OIDC Provider"
+  description                        = "GitHub Actions used for CI/CD"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com/"
@@ -60,8 +60,33 @@ resource "google_iam_workload_identity_pool_provider" "github_actions_oidc" {
     "attribute.branch"        = "assertion.sub.extract('/heads/{branch}/')"
   }
 
-  attribute_condition = "assertion.repository_owner=='sec-mik'"
+  # Condition to restrict access to your specific GitHub repository
+  attribute_condition = "attribute.repository == 'Yuriyamadama/test_123'"
 }
+
+  
+# resource "google_iam_workload_identity_pool_provider" "github_actions_oidc" {
+#   project                            = local.project_id
+#   workload_identity_pool_provider_id = "myprovider"
+#   workload_identity_pool_id          = google_iam_workload_identity_pool.mypool.workload_identity_pool_id 
+#   display_name              = "GitHub Actions OIDC Provider"
+#   description                        = "GitHub Actions で使用"
+
+#   oidc {
+#     issuer_uri = "https://token.actions.githubusercontent.com/"
+#   }
+
+#   attribute_mapping = {
+#     "google.subject"          = "assertion.sub"
+#     "attribute.repository"    = "assertion.repository"
+#     "attribute.repository_owner" = "assertion.repository_owner"
+#     "attribute.branch"        = "assertion.sub.extract('/heads/{branch}/')"
+#   }
+#   # Update the condition to match the repository owner and repository name.
+#   attribute_condition = "attribute.repository == 'sec-mik/your-repo-name'"
+
+#   attribute_condition = "assertion.repository_owner=='sec-mik'"
+# }
 
 # resource "google_iam_workload_identity_pool_provider" "myprovider" {
 #     provider                           = google-beta
