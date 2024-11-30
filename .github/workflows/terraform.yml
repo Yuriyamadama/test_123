@@ -30,7 +30,7 @@ jobs:
         uses: 'google-github-actions/auth@v1'
         with:
           workload_identity_provider: 'projects/29876310849/locations/global/workloadIdentityPools/mypool/providers/myprovider'
-          service_account: 'tf-exec@myproject.iam.gserviceaccount.com'
+          service_account: 'githubaction-for@glassy-iridium-438509-u8.iam.gserviceaccount.com'
           #workload_identity_provider: 'projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/mypool/providers/myprovider'
           #service_account: 'tf-exec@myproject.iam.gserviceaccount.com'
   
