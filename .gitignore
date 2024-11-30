@@ -1,0 +1,7 @@
+.terraform/
+test.json
+iac/.terraform/
+# Ignore Terraform files
+iac/.terraform/
+*.terraform
+terraform-provider-*
