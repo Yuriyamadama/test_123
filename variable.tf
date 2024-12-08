@@ -4,13 +4,6 @@ variable "project_id" {
   type        = string
 }
 
-# 何も指定しなければ聞いてくる。
-
-# variable "organization_id" {
-#   description = "The ID of the organization"
-#   type        = string
-# }
-
 variable "region" {
   description = "Region for GCP services"
   type        = string
@@ -34,13 +27,3 @@ variable "terraform_email" {
   type        = string
   default = "githubaction-for@glassy-iridium-438509-u8.iam.gserviceaccount.com"
 }
-
-
-# variable "services" {
-#   default = [
-#     "iam.googleapis.com",
-#     "cloudresourcemanager.googleapis.com",
-#     "iamcredentials.googleapis.com",
-#     "sts.googleapis.com"
-#   ]
-# }

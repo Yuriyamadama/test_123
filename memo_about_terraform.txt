@@ -1,0 +1,124 @@
+# variable
+variableは定義後に、何も指定しなければ聞いてくる。
+
+# Workload Identity
+
+Workload Identity Pool Providerとは？
+GCP（Google Cloud Platform）のWorkload Identity Poolは、外部のアイデンティティプロバイダー（例：GitHub、Microsoft Active Directory、OIDCなど）を使用してGoogle Cloudリソースにアクセスできる仕組みです。
+この中で「Workload Identity Pool Provider」は、特定の外部IDプロバイダーとGCPのWorkload Identity Poolを接続する役割を果たします。
+
+構造と仕組み
+Workload Identity Pool
+複数の外部IDプロバイダー（GitHub Actions、Oktaなど）を統合するためのコンテナ的な役割。
+
+Workload Identity Pool Provider
+各外部IDプロバイダーの詳細情報を定義します（例：GitHub ActionsのOIDCトークン設定）。
+
+Service Accountの紐付け
+Workload Identity Pool Providerを通じて認証が成功した外部エンティティ（例：GitHubのWorkflow）が、特定のGCPリソースにアクセスできるように、GCPのService Accountと紐付けられます。
+
+利用シナリオ
+Workload Identity Pool Providerは次のようなシナリオで使用されます：
+GitHub Actionsからのデプロイ: GitHub Actionsを使ってアプリケーションをGCPにデプロイする際、認証情報を直接共有せずにアクセスを安全に行える。
+マルチクラウド環境での認証統合: AWSやAzureで管理しているユーザーやサービスを、GCPリソースに統合する。
+セキュリティ強化: 一時的な認証トークンを利用するため、静的な認証情報（キーやパスワード）を使わず、セキュリティリスクを低減。
+
+関連url
+https://cloud.google.com/blog/ja/products/identity-security/secure-your-use-of-third-party-tools-with-identity-federation?hl=ja
+https://blog.g-gen.co.jp/entry/using-terraform-via-github-actions
+
+
+
+# 大きすぎるデータのgit対応
+ls -lhは子ファイルの大きさまで考慮しない
+du -sh iac がベスト
+git rm -r --cached iac/.terraform/
+
+# Terraform IAM ロール
+https://blog.g-gen.co.jp/entry/how-to-use-iam-resources-of-terraform
+基本的にiam_memberを使っておけばok
+
+# security、階層別の
+Within GCP, there is a hierarchy: Organization, Project, Resource
+The IAM policies you mentioned behaves the same; however, works on different levels based on the hierarchy.
+For example, the google_project_iam_member will update the IAM policy to grant a role to a new member on the project level.
+The google_organization_iam_member will do the same thing, but on the Organization level (which is a level higher than the project.
+
+
+# 認証系
+
+## /Users/yuriyamada/.config/gcloud/application_default_credentials.json
+
+
+## gcloud auth listで表示
+
+activeとは？
+使うusecaseのみ
+
+## Use auth/impersonate_service_account if:
+gcloud config set auth/impersonate_service_account SERVICE_ACCT_EMAIL
+gcloud CLI で権限借用をデフォルトで使用する
+Use gcloud config set auth/impersonate_service_account when you need to run commands on behalf of a service account 
+without switching the active account. !
+This is typically used in cases where you want to delegate permissions to another service account, such as in CI/CD pipelines.
+デフォルトでサービス アカウントによって提供される ID とアクセス権を使用するように gcloud CLI を設定するには、gcloud CLI config コマンドを使用します。
+You want to impersonate a service account temporarily.
+Your current credentials have permission to impersonate the service account.
+You need to preserve your current active account.
+Use gcloud config set auth/impersonate_service_account 
+when you want to impersonate a service account across multiple gcloud commands without having to repeat the impersonation flag each time.
+
+## Use set account if:
+gcloud config set account githubaction-for@glassy-iridium-438509-u8.iam.gserviceaccount.com
+Use gcloud config set account when you want to authenticate directly as a service account or another user, 
+meaning all commands will execute with the full permissions of that account.
+You want to switch to a service account or another account directly.
+but all commands will execute as the service account.
+The service account is authenticated with a key file or gcloud auth activate-service-account.
+
+## Key Difference:
+Impersonation (auth/impersonate_service_account): You remain logged in with your original account, but for specific commands, you're temporarily using another service account's permissions.
+Account Switch (gcloud config set account): You actually change the authenticating account, so all future gcloud operations will be executed as that account.
+
+## Use gcloud auth application-default login --impersonate-service-account 
+gcloud auth application-default login --impersonate-service-account githubaction-for@glassy-iridium-438509-u8.iam.gserviceaccount.com
+Temporary, applies to the specific gcloud session you're running!!
+gcloud auth application-default login command configures Application Default Credentials (ADC) for libraries and SDKs, 
+but it does not change the active user account for the gcloud CLI. Thus, your personal account remains the active account in the gcloud auth list.
+https://cloud.google.com/docs/authentication/use-service-account-impersonation?hl=ja
+
+
+##特定の gcloud CLI コマンドで権限借用を使用するには、--impersonate-service-account フラグを使用します。
+特定のコマンドへのimpersonate
+たとえば、次のコマンドは、指定したサービス アカウントから提供された ID とアクセス権を使用して、ストレージ バケットを一覧表示します。
+gcloud storage buckets list --impersonate-service-account=SERVICE_ACCT_EMAIL
+
+#多分いらないコード
+
+# Terraform コマンドを実行するユーザーアカウントに対し、「サービスアクセストークン作成者ロール」を付与します。
+resource "google_project_iam_member" "service_account_token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "user:${var.user_account}"
+}
+
+# 
+# resource "google_service_account_iam_member" "terraform_sa" {
+#     service_account_id = data.google_service_account.terraform_sa.id
+#     role               = "roles/iam.workloadIdentityUser"
+#     member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.mypool.name}/attribute.repository/${var.github_repository}"
+# }
+resource "google_project_iam_member" "tokencreator" {
+  project = var.project_id
+  role   = "roles/iam.serviceAccountTokenCreator"
+  member = "serviceAccount:${var.terraform_email}"
+}
+
+# variable "services" {
+#   default = [
+#     "iam.googleapis.com",
+#     "cloudresourcemanager.googleapis.com",
+#     "iamcredentials.googleapis.com",
+#     "sts.googleapis.com"
+#   ]
+# }
