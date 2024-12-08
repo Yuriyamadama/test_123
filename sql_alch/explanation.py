@@ -1,4 +1,5 @@
 # ドキュメントは説明がめちゃくちゃわかりにくくて理解不能
+
 class User(TimeStampedModel):
     __tablename__ = "users"
 
